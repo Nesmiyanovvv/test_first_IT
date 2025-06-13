@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Записи ДДС{% endblock %}
+
+{% block content %}
+    <h1>Записи ДДС</h1>
+
+    <a href="{% url 'record_create' %}" class="btn btn-primary mb-3">Добавить запись</a>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Дата</th>
+            <th>Тип</th>
+            <th>Категория</th>
+            <th>Подкатегория</th>
+            <th>Статус</th>
+            <th>Сумма</th>
+            <th>Комментарий</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for record in records %}
+            <tr>
+                <td>{{ record.custom_date|default:record.created_at }}</td>
+                <td>{{ record.type }}</td>
+                <td>{{ record.category }}</td>
+                <td>{{ record.subcategory }}</td>
+                <td>{{ record.status }}</td>
+                <td>{{ record.amount|intcomma }} р.</td>
+                <td>{{ record.comment }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
