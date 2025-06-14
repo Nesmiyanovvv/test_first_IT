@@ -6,7 +6,59 @@
 {% block content %}
     <h1>Записи ДДС</h1>
 
+    <form method="get" class="row mb-3">
+        <div class="col">
+            <label>С:</label>
+            <input type="date" name="start_date" class="form-control" value="{{ filters.start_date }}">
+        </div>
+        <div class="col">
+            <label>По:</label>
+            <input type="date" name="end_date" class="form-control" value="{{ filters.end_date }}">
+        </div>
+        <div class="col">
+            <label>Статус:</label>
+            <select name="status" class="form-control">
+                <option value="">Все</option>
+                {% for s in statuses %}
+                    <option value="{{ s.id }}" {% if filters.status == s.id|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col">
+            <label>Тип:</label>
+            <select name="type" id="filter_type" class="form-control">
+                <option value="">Все</option>
+                {% for t in types %}
+                    <option value="{{ t.id }}" {% if filters.type == t.id|stringformat:"s" %}selected{% endif %}>{{ t.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col">
+            <label>Категория:</label>
+            <select name="category" id="filter_category" class="form-control">
+                <option value="">Все</option>
+                {% for c in categories %}
+                    <option value="{{ c.id }}" {% if filters.category == c.id|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col">
+            <label>Подкатегория:</label>
+            <select name="subcategory" id="filter_subcategory" class="form-control">
+                <option value="">Все</option>
+                {% for sc in subcategories %}
+                    <option value="{{ sc.id }}" {% if filters.subcategory == sc.id|stringformat:"s" %}selected{% endif %}>{{ sc.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto d-flex align-items-end">
+            <button type="submit" class="btn btn-primary">Применить</button>
+            <a href="{% url 'record_list' %}" class="btn btn-secondary ms-2">Сбросить</a>
+        </div>
+    </form>
+
     <a href="{% url 'record_create' %}" class="btn btn-primary mb-3">Добавить запись</a>
+    <a href="{% url 'directory_home' %}" class="btn btn-outline-secondary mb-3 ms-2">Управление справочниками</a>
 
     <table class="table table-striped">
         <thead>
@@ -18,6 +70,7 @@
             <th>Статус</th>
             <th>Сумма</th>
             <th>Комментарий</th>
+            <th>Действия</th>
         </tr>
         </thead>
         <tbody>
@@ -30,8 +83,73 @@
                 <td>{{ record.status }}</td>
                 <td>{{ record.amount|intcomma }} р.</td>
                 <td>{{ record.comment }}</td>
+                <td>
+                    <a href="{% url 'record_edit' record.pk %}" class="btn btn-sm btn-warning">✏️</a>
+                    <a href="{% url 'record_delete' record.pk %}" class="btn btn-sm btn-danger">🗑️</a>
+                </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-{% endblock %}
+{% endblock content %}
+
+{% block extra_scripts %}
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        const loadCategoriesUrl = "{% url 'ajax_load_categories' %}";
+        const loadSubcategoriesUrl = "{% url 'ajax_load_subcategories' %}";
+
+        $(document).ready(function() {
+            $('#filter_type').change(function() {
+                let typeId = $(this).val();
+                $.ajax({
+                    url: loadCategoriesUrl,
+                    data: {
+                        'type_id': typeId
+                    },
+                    success: function(data) {
+                        let categorySelect = $('#filter_category');
+                        categorySelect.empty();
+                        categorySelect.append('<option value="">Все</option>');
+                        data.forEach(function(category) {
+                            categorySelect.append('<option value="' + category.id + '">' + category.name + '</option>');
+                        });
+
+                        // Очистить подкатегории
+                        let subcategorySelect = $('#filter_subcategory');
+                        subcategorySelect.empty();
+                        subcategorySelect.append('<option value="">Все</option>');
+                    }
+                });
+            });
+
+            $('#filter_category').change(function() {
+                let categoryId = $(this).val();
+                $.ajax({
+                    url: loadSubcategoriesUrl,
+                    data: {
+                        'category_id': categoryId
+                    },
+                    success: function(data) {
+                        let subcategorySelect = $('#filter_subcategory');
+                        subcategorySelect.empty();
+                        subcategorySelect.append('<option value="">Все</option>');
+                        data.forEach(function(subcategory) {
+                            subcategorySelect.append('<option value="' + subcategory.id + '">' + subcategory.name + '</option>');
+                        });
+                    }
+                });
+            });
+
+            // ← автоматическая инициализация при фильтре
+            if ($('#filter_type').val()) {
+                $('#filter_type').trigger('change');
+            }
+            if ($('#filter_category').val()) {
+                $('#filter_category').trigger('change');
+            }
+        });
+    </script>
+{% endblock extra_scripts %}

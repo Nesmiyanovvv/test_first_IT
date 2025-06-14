@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Управление справочниками{% endblock %}
+
+{% block content %}
+    <h1>Справочники</h1>
+
+    <h3>Типы</h3>
+    <a href="{% url 'directory_create' 'type' %}" class="btn btn-sm btn-primary mb-2">Добавить тип</a>
+    <ul>
+        {% for item in types %}
+            <li>{{ item.name }} —
+                <a href="{% url 'directory_edit' 'type' item.id %}">✏️</a>
+                <a href="{% url 'directory_delete' 'type' item.id %}">🗑️</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h3>Статусы</h3>
+    <a href="{% url 'directory_create' 'status' %}" class="btn btn-sm btn-primary mb-2">Добавить статус</a>
+    <ul>
+        {% for item in statuses %}
+            <li>{{ item.name }} —
+                <a href="{% url 'directory_edit' 'status' item.id %}">✏️</a>
+                <a href="{% url 'directory_delete' 'status' item.id %}">🗑️</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h3>Категории</h3>
+    <a href="{% url 'directory_create' 'category' %}" class="btn btn-sm btn-primary mb-2">Добавить категорию</a>
+    <ul>
+        {% for item in categories %}
+            <li>{{ item.name }} (Тип: {{ item.type.name }}) —
+                <a href="{% url 'directory_edit' 'category' item.id %}">✏️</a>
+                <a href="{% url 'directory_delete' 'category' item.id %}">🗑️</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h3>Подкатегории</h3>
+    <a href="{% url 'directory_create' 'subcategory' %}" class="btn btn-sm btn-primary mb-2">Добавить подкатегорию</a>
+    <ul>
+        {% for item in subcategories %}
+            <li>{{ item.name }} (Категория: {{ item.category.name }}) —
+                <a href="{% url 'directory_edit' 'subcategory' item.id %}">✏️</a>
+                <a href="{% url 'directory_delete' 'subcategory' item.id %}">🗑️</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
